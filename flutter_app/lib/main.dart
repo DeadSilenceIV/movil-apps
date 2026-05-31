@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/productos/presentation/state/productos_provider.dart';
+import 'injection_container.dart';
 
 void main() {
+  initDependencies();
   runApp(const ProductosApp());
 }
 
@@ -11,19 +15,22 @@ class ProductosApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Productos',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
-      home: const _HomePlaceholder(),
+    return ChangeNotifierProvider<ProductosProvider>(
+      create: (_) => sl<ProductosProvider>()..load(),
+      child: MaterialApp(
+        title: 'Productos',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: ThemeMode.system,
+        home: const _HomePlaceholder(),
+      ),
     );
   }
 }
 
-/// Pantalla inicial temporal (card 04). Se reemplaza por la navegación real
-/// y la lista de productos en las cards 07 y 08.
+/// Home temporal (card 06): consume el estado en memoria y reacciona a sus
+/// cambios. Se reemplaza por la navegación real (go_router) en la card 07.
 class _HomePlaceholder extends StatelessWidget {
   const _HomePlaceholder();
 
@@ -31,8 +38,19 @@ class _HomePlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Productos')),
-      body: const Center(
-        child: Text('Proyecto Flutter inicializado'),
+      body: Center(
+        child: Consumer<ProductosProvider>(
+          builder: (context, provider, _) {
+            return switch (provider.status) {
+              ProductosStatus.loading ||
+              ProductosStatus.initial =>
+                const CircularProgressIndicator(),
+              ProductosStatus.error => Text(provider.error),
+              ProductosStatus.loaded =>
+                Text('${provider.productos.length} productos en memoria'),
+            };
+          },
+        ),
       ),
     );
   }
