@@ -39,10 +39,10 @@ src/
     data/           # ProductoModel (JSON), datasources remoto + en memoria, repository impl
     presentation/
       state/        # productosStore.ts (Zustand) — estado global en RAM
-      # screens/    # pantallas de productos (card posterior)
+      screens/      # ProductosList / ProductoDetail / ProductoForm
+  navigation/       # AppNavigator.tsx — native-stack tipado (3 rutas)
   di/               # container.ts — composición de dependencias (use cases)
-  screens/          # WelcomeScreen (tema + demo del estado)
-App.tsx             # raíz: ThemeProvider + pantalla inicial
+App.tsx             # raíz: ThemeProvider + AppNavigator
 scripts/
   validate-api.ts   # validación de la capa de API contra DummyJSON
   validate-state.ts # validación del estado en memoria (CRUD en RAM)
@@ -93,8 +93,8 @@ Gestor de estado formal con **Zustand** (`features/productos/presentation/state/
   coordina el datasource remoto (API) y el de memoria; las escrituras se reflejan siempre en RAM.
 - Estados expuestos: `status` (`initial`/`loading`/`loaded`/`error`), `items`, `error`, `query`.
 
-La `WelcomeScreen` consume el store (carga real, spinner de loading, reintento ante error
-y la lista en memoria) como prueba visual de la reactividad.
+Las pantallas de productos consumen el store (carga real, spinner de loading, reintento
+ante error y la lista en memoria) como prueba visual de la reactividad.
 
 ### Validar (estado en memoria)
 
@@ -103,6 +103,25 @@ npx tsx scripts/validate-state.ts
 ```
 
 Comprueba que load/create/update/search/delete se mantienen y reflejan en RAM.
+
+## Navegación entre pantallas (card 13)
+
+Navegación formal con **React Navigation** (`@react-navigation/native` + `native-stack`)
+en `src/navigation/AppNavigator.tsx` — 3 pantallas con transiciones nativas, gesto de
+retorno y header estilizado según el design system (mismos hex que la app Flutter):
+
+- **`ProductosList`** (principal): lista desde el estado en RAM, *pull-to-refresh*, FAB
+  «Nuevo» → formulario, y al tocar una fila → detalle pasando `{ id }` como parámetro.
+- **`ProductoDetail`**: recibe el `id` por parámetro y **resuelve el producto desde el
+  store** (evita pasar instancias no serializables); muestra imagen, título/precio, chips
+  (categoría/stock/rating) y descripción, con acciones de editar y eliminar.
+- **`ProductoForm`**: parámetro `id` opcional (presente = edición con campos precargados);
+  inputs `outlined` con validación (título obligatorio, precio > 0); guarda vía el store y
+  regresa con `goBack()`.
+
+Las rutas y sus parámetros están tipados en `RootStackParamList`, por lo que `navigate`
+verifica en compilación que cada pantalla reciba los parámetros correctos. El back gesture
+nativo no rompe el estado: la lista permanece en RAM en el store global.
 
 ## Ejecutar
 
