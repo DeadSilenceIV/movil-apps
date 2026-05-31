@@ -30,14 +30,19 @@ Estructura objetivo según `.claude/skills/clean-architecture/SKILL.md`:
 ```
 src/
   core/
-    theme/          # tema centralizado (design system) — implementado
-    error/          # Failure types (cards posteriores)
-    network/        # cliente HTTP base (cards posteriores)
-    usecase/        # tipo UseCase base (cards posteriores)
-  features/items/   # domain / data / presentation (cards posteriores)
+    theme/          # tema centralizado (design system)
+    error/          # exceptions.ts / failures.ts
+    network/        # apiClient.ts (axios) — cliente HTTP base
+    usecase/        # contrato base UseCase<T, P>
+  features/productos/
+    domain/         # Producto, ProductoRepository, use cases (get/create/update/delete/search)
+    data/           # ProductoModel (JSON), productoRemoteDataSource (CRUD API)
+    # presentation/ # estado y pantallas (cards posteriores)
   screens/          # WelcomeScreen inicial del scaffolding
-  di/               # composición de dependencias (cards posteriores)
+  # di/             # composición de dependencias (card posterior)
 App.tsx             # raíz: ThemeProvider + pantalla inicial
+scripts/
+  validate-api.ts   # validación manual de la capa de API contra DummyJSON
 ```
 
 ## Tema / design system
@@ -49,6 +54,29 @@ Tema centralizado en `src/core/theme/` (única fuente de verdad: `docs/design-sy
   (`app.json` → `userInterfaceStyle: "automatic"`).
 - Tokens de espaciado (escala 4/8 px), radios (tarjetas 16, controles 12) e iconografía
   `@expo/vector-icons` (vía Paper).
+
+## Consumo de API REST (card 11)
+
+Capa de datos sobre la misma API que la app Flutter — **DummyJSON** `/products`
+(`docs/02-api-rest.md`):
+
+- `core/network/apiClient.ts`: instancia axios (`https://dummyjson.com`) que traduce los
+  errores técnicos a `ServerException` (respuesta 4xx/5xx) y `NetworkException` (timeout/sin red).
+- `data/datasources/productoRemoteDataSource.ts`: las 4 operaciones CRUD
+  (`GET /products`, `GET /products/{id}`, `GET /products/search`, `POST /products/add`,
+  `PUT /products/{id}`, `DELETE /products/{id}`).
+- `data/models/ProductoModel.ts`: (de)serialización JSON ↔ entidad de dominio `Producto`.
+- `core/error/`: `Failure` de dominio (`ServerFailure`, `NetworkFailure`) que la capa de
+  presentación mostrará como mensajes; los datasources lanzan las excepciones técnicas.
+
+### Validar (petición real)
+
+```bash
+npx tsx scripts/validate-api.ts
+```
+
+Ejercita GET/POST/PUT/DELETE + búsqueda y dos casos de error (sin red / 404) contra la API
+real, imprimiendo cada respuesta exitosa en el log.
 
 ## Ejecutar
 
