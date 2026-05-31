@@ -71,7 +71,16 @@ class _ProductoFormPageState extends State<ProductoFormPage> {
     if (!mounted) return;
     setState(() => _saving = false);
     if (ok) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(
+          content: Text(_isEdit ? 'Producto actualizado' : 'Producto creado'),
+        ));
       context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(provider.error.isEmpty ? 'No se pudo guardar' : provider.error)),
+      );
     }
   }
 
