@@ -118,15 +118,22 @@ _Conclusión objetiva por completar tras recoger las métricas._
   `feature/rn-navegacion`.
 - `metrics/<nombre>`: ramas para la toma de métricas, p. ej. `metrics/cold-start`.
 
-### Commits (Conventional Commits)
-Formato: `tipo(scope): descripción breve en imperativo`
+### Commits
+Formato **obligatorio**: `[CU-<id de la card de ClickUp>]: <mensaje en imperativo>`
 
-- **tipos:** `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`, `build`.
-- **scope (sugerido):** `flutter`, `rn`, `docs`, `repo`.
+- El prefijo `[CU-<id>]` enlaza el commit con su card de ClickUp (p. ej. `[CU-86e1mqw3f]`).
+- `<mensaje>`: descripción breve, en imperativo y en español.
 - Ejemplos:
-  - `feat(flutter): añade use case CreateProducto`
-  - `feat(rn): implementa pantalla de detalle`
-  - `docs(repo): completa métrica de cold start en el informe`
+  - `[CU-86e1mqw3f]: inicializa proyecto Flutter con tema Material 3`
+  - `[CU-86e1mqw49]: implementa CRUD en memoria con FlatList y tarjetas`
+  - `[CU-86e1mqw55]: completa métrica de cold start en el informe`
+
+> **El formato se valida automáticamente** con un hook `commit-msg` versionado en
+> `.githooks/`. Actívalo una sola vez tras clonar el repo:
+> ```bash
+> git config core.hooksPath .githooks
+> ```
+> Cualquier commit cuyo asunto no empiece por `[CU-<id>]:` será **rechazado**.
 
 ### Flujo
 1. Crear rama desde `main` (o `develop`).

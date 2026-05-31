@@ -76,3 +76,6 @@ yarn-error.*
 # --- Logs ---
 *.log
 logs/
+
+# --- Documento de la actividad (no versionar) ---
+*.docx

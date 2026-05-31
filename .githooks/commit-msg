@@ -1,0 +1,27 @@
+#!/bin/sh
+# Hook que FUERZA la convención de mensajes de commit del repo:
+#   [CU-<id de la card de ClickUp>]: <mensaje>
+# Ejemplo válido:  [CU-86e1mqw3f]: inicializa proyecto Flutter con tema Material 3
+#
+# Activación (una sola vez por clon):  git config core.hooksPath .githooks
+
+commit_msg_file="$1"
+# Primera línea no vacía (ignora comentarios que empiezan con #)
+subject=$(grep -v '^#' "$commit_msg_file" | sed '/^[[:space:]]*$/d' | head -n1)
+
+# Patrón requerido: [CU-<alfanumérico>]: <mensaje no vacío>
+pattern='^\[CU-[A-Za-z0-9]+\]: .+'
+
+if ! printf '%s' "$subject" | grep -Eq "$pattern"; then
+  echo "------------------------------------------------------------------" >&2
+  echo "✖ Commit rechazado: el mensaje no sigue la convención obligatoria." >&2
+  echo "" >&2
+  echo "  Formato requerido:  [CU-<id de la card de ClickUp>]: <mensaje>" >&2
+  echo "  Ejemplo:            [CU-86e1mqw3f]: inicializa proyecto Flutter" >&2
+  echo "" >&2
+  echo "  Tu mensaje fue:     $subject" >&2
+  echo "------------------------------------------------------------------" >&2
+  exit 1
+fi
+
+exit 0
