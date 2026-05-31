@@ -1,27 +1,40 @@
+import { useEffect } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Appbar, Button, Card, FAB, Text } from 'react-native-paper';
+import { ActivityIndicator, Appbar, Button, Card, FAB, List, Text } from 'react-native-paper';
 
 import { radius, spacing, typography, useAppTheme } from '../core/theme';
+import {
+  selectVisibleProductos,
+  useProductosStore,
+} from '../features/productos/presentation/state/productosStore';
 
 /**
- * Pantalla inicial del scaffolding (card 10). Solo verifica que el tema del
- * design system está activo; las pantallas de productos llegan en cards posteriores.
+ * Pantalla inicial. Demuestra el tema del design system (card 10) y consume el
+ * estado global en memoria (card 12) para mostrar reactividad: carga real desde
+ * la API, estados de loading/error y la lista mantenida en RAM.
  */
 export default function WelcomeScreen() {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
 
+  const status = useProductosStore((s) => s.status);
+  const error = useProductosStore((s) => s.error);
+  const productos = useProductosStore(selectVisibleProductos);
+  const load = useProductosStore((s) => s.load);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Appbar.Header mode="small" elevated>
         <Appbar.Content title="Productos" titleStyle={typography.title} />
-        <Appbar.Action icon="magnify" onPress={() => {}} />
+        <Appbar.Action icon="refresh" onPress={() => load(true)} />
       </Appbar.Header>
 
-      <ScrollView
-        contentContainerStyle={{ padding: spacing.screen, gap: spacing.lg }}
-      >
+      <ScrollView contentContainerStyle={{ padding: spacing.screen, gap: spacing.lg }}>
         <View style={{ gap: spacing.xs }}>
           <Text style={[typography.headline, { color: theme.colors.onSurface }]}>
             React Native + Expo
@@ -35,28 +48,49 @@ export default function WelcomeScreen() {
         <Card style={styles.card} mode="elevated">
           <Card.Content style={{ gap: spacing.sm }}>
             <Text style={[typography.subtitle, { color: theme.colors.onSurface }]}>
-              Tema centralizado
+              Estado global (RAM)
             </Text>
-            <Text style={[typography.body, { color: theme.colors.onSurfaceMuted }]}>
-              Semilla #4F46E5 · tokens en core/theme · idéntico a la app Flutter.
-            </Text>
-            <View style={styles.swatches}>
-              <Swatch color={theme.colors.primary} label="primary" />
-              <Swatch color={theme.colors.secondary} label="secondary" />
-              <Swatch color={theme.colors.success} label="success" />
-              <Swatch color={theme.colors.error} label="error" />
-            </View>
+
+            {status === 'loading' && (
+              <View style={styles.centerRow}>
+                <ActivityIndicator />
+                <Text style={[typography.body, { color: theme.colors.onSurfaceMuted }]}>
+                  Cargando productos del API…
+                </Text>
+              </View>
+            )}
+
+            {status === 'error' && (
+              <View style={{ gap: spacing.sm }}>
+                <Text style={[typography.body, { color: theme.colors.error }]}>{error}</Text>
+                <Button mode="outlined" onPress={() => load(true)}>
+                  Reintentar
+                </Button>
+              </View>
+            )}
+
+            {status === 'loaded' && (
+              <>
+                <Text style={[typography.body, { color: theme.colors.onSurfaceMuted }]}>
+                  {productos.length} productos en memoria durante la sesión.
+                </Text>
+                {productos.slice(0, 5).map((p) => (
+                  <List.Item
+                    key={p.id}
+                    title={p.title}
+                    description={p.category}
+                    titleStyle={typography.subtitle}
+                    right={() => (
+                      <Text style={[typography.subtitle, { color: theme.colors.primary }]}>
+                        ${p.price}
+                      </Text>
+                    )}
+                  />
+                ))}
+              </>
+            )}
           </Card.Content>
         </Card>
-
-        <View style={{ gap: spacing.sm }}>
-          <Button mode="contained" icon="rocket-launch" onPress={() => {}}>
-            Botón primario
-          </Button>
-          <Button mode="outlined" onPress={() => {}}>
-            Botón secundario
-          </Button>
-        </View>
       </ScrollView>
 
       <FAB
@@ -68,31 +102,14 @@ export default function WelcomeScreen() {
   );
 }
 
-function Swatch({ color, label }: { color: string; label: string }) {
-  const theme = useAppTheme();
-  return (
-    <View style={{ alignItems: 'center', gap: spacing.xs }}>
-      <View style={[styles.swatch, { backgroundColor: color }]} />
-      <Text style={[typography.caption, { color: theme.colors.onSurfaceMuted }]}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   card: {
     borderRadius: radius.card,
   },
-  swatches: {
+  centerRow: {
     flexDirection: 'row',
-    gap: spacing.lg,
-    marginTop: spacing.sm,
-  },
-  swatch: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.control,
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   fab: {
     position: 'absolute',

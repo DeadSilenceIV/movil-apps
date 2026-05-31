@@ -36,13 +36,16 @@ src/
     usecase/        # contrato base UseCase<T, P>
   features/productos/
     domain/         # Producto, ProductoRepository, use cases (get/create/update/delete/search)
-    data/           # ProductoModel (JSON), productoRemoteDataSource (CRUD API)
-    # presentation/ # estado y pantallas (cards posteriores)
-  screens/          # WelcomeScreen inicial del scaffolding
-  # di/             # composición de dependencias (card posterior)
+    data/           # ProductoModel (JSON), datasources remoto + en memoria, repository impl
+    presentation/
+      state/        # productosStore.ts (Zustand) — estado global en RAM
+      # screens/    # pantallas de productos (card posterior)
+  di/               # container.ts — composición de dependencias (use cases)
+  screens/          # WelcomeScreen (tema + demo del estado)
 App.tsx             # raíz: ThemeProvider + pantalla inicial
 scripts/
-  validate-api.ts   # validación manual de la capa de API contra DummyJSON
+  validate-api.ts   # validación de la capa de API contra DummyJSON
+  validate-state.ts # validación del estado en memoria (CRUD en RAM)
 ```
 
 ## Tema / design system
@@ -77,6 +80,29 @@ npx tsx scripts/validate-api.ts
 
 Ejercita GET/POST/PUT/DELETE + búsqueda y dos casos de error (sin red / 404) contra la API
 real, imprimiendo cada respuesta exitosa en el log.
+
+## Manejo de estado en memoria (card 12)
+
+Gestor de estado formal con **Zustand** (`features/productos/presentation/state/productosStore.ts`):
+
+- Store global accesible desde cualquier pantalla con el hook `useProductosStore`; la UI
+  reacciona automáticamente a los cambios (sin `useState` disperso).
+- Mantiene la lista en **RAM** durante toda la sesión vía el `ProductoInMemoryDataSource`
+  (singleton del contenedor DI). **No hay persistencia local**: al cerrar la app se pierde.
+- El store invoca **casos de uso** (nunca el repositorio ni HTTP). El `ProductoRepositoryImpl`
+  coordina el datasource remoto (API) y el de memoria; las escrituras se reflejan siempre en RAM.
+- Estados expuestos: `status` (`initial`/`loading`/`loaded`/`error`), `items`, `error`, `query`.
+
+La `WelcomeScreen` consume el store (carga real, spinner de loading, reintento ante error
+y la lista en memoria) como prueba visual de la reactividad.
+
+### Validar (estado en memoria)
+
+```bash
+npx tsx scripts/validate-state.ts
+```
+
+Comprueba que load/create/update/search/delete se mantienen y reflejan en RAM.
 
 ## Ejecutar
 
