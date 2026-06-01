@@ -5,7 +5,7 @@ CRUD sobre una API REST y estado en memoria) en **dos tecnologías** —  Flutte
 React Native (Expo) — para medir y comparar su rendimiento y experiencia de desarrollo.
 
 Toda la implementación sigue **Clean Architecture** (capas `domain` / `data` / `presentation`).
-Ver la guía en [`.claude/skills/clean-architecture/SKILL.md`](.claude/skills/clean-architecture/SKILL.md).
+
 
 ## Estructura del repositorio
 
@@ -89,9 +89,9 @@ reproducible** documentada en `docs/`.
   10 medidas; cold start 1 warm-up + 10 medidas (se reporta el promedio); fluidez gestos `adb`
   reproducibles (12 flings de scroll, 8 ciclos de navegación); tamaño/compilación: build limpio.
 - **Evidencia detallada:** [`docs/comparativa-tamano-compilacion.md`](docs/comparativa-tamano-compilacion.md)
-  (card 16), [`docs/comparativa-tiempo-respuesta-api.md`](docs/comparativa-tiempo-respuesta-api.md)
-  (card 17), [`docs/comparativa-fluidez-fps.md`](docs/comparativa-fluidez-fps.md) (card 18),
-  [`docs/comparativa-cold-start.md`](docs/comparativa-cold-start.md) (card 19) y los datos crudos en
+  , [`docs/comparativa-tiempo-respuesta-api.md`](docs/comparativa-tiempo-respuesta-api.md)
+  , [`docs/comparativa-fluidez-fps.md`](docs/comparativa-fluidez-fps.md),
+  [`docs/comparativa-cold-start.md`](docs/comparativa-cold-start.md) y los datos crudos en
   [`docs/flutter-build-metrics.md`](docs/flutter-build-metrics.md) /
   [`docs/react-native-build-metrics.md`](docs/react-native-build-metrics.md).
 
@@ -154,7 +154,6 @@ pequeña y no perceptible para el usuario**.
 | Métrica                  | Flutter        | React Native      | Observaciones |
 |--------------------------|----------------|-------------------|---------------|
 | Build release (limpio)   | ~110 s (107.7) | ~785 s (13 m 05 s)| Gradle `assembleRelease`; RN **~7.1×** por recompilar C++ nativo (CMake/NDK) + Hermes |
-| Build incremental        | _—_            | _—_               | Pendiente (segundo build sin cambios) |
 
 ### 4.1 Recarga en desarrollo (hot reload / fast refresh)
 
@@ -247,34 +246,3 @@ APK y tiempos de compilación) más que el rendimiento en ejecución.
 
 ---
 
-## Convención de ramas y commits
-
-### Ramas
-- `main`: rama estable; solo recibe merges revisados.
-- `develop`: integración del trabajo en curso (opcional según el flujo del grupo).
-- `feature/<stack>-<descripcion>`: p. ej. `feature/flutter-crud-productos`,
-  `feature/rn-navegacion`.
-- `metrics/<nombre>`: ramas para la toma de métricas, p. ej. `metrics/cold-start`.
-
-### Commits
-Formato **obligatorio**: `[CU-<id de la card de ClickUp>]: <mensaje en imperativo>`
-
-- El prefijo `[CU-<id>]` enlaza el commit con su card de ClickUp (p. ej. `[CU-86e1mqw3f]`).
-- `<mensaje>`: descripción breve, en imperativo y en español.
-- Ejemplos:
-  - `[CU-86e1mqw3f]: inicializa proyecto Flutter con tema Material 3`
-  - `[CU-86e1mqw49]: implementa CRUD en memoria con FlatList y tarjetas`
-  - `[CU-86e1mqw55]: completa métrica de cold start en el informe`
-
-> **El formato se valida automáticamente** con un hook `commit-msg` versionado en
-> `.githooks/`. Actívalo una sola vez tras clonar el repo:
-> ```bash
-> git config core.hooksPath .githooks
-> ```
-> Cualquier commit cuyo asunto no empiece por `[CU-<id>]:` será **rechazado**.
-
-### Flujo
-1. Crear rama desde `main` (o `develop`).
-2. Commits pequeños y descriptivos.
-3. Pull Request hacia `main`/`develop` con al menos una revisión.
-4. Merge tras aprobación.
