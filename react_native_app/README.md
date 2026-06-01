@@ -146,6 +146,29 @@ diseño que la app Flutter (`docs/design-system.md` §4):
 Todas las operaciones (crear/editar/eliminar/buscar) se reflejan de inmediato en la lista
 porque operan sobre el estado en memoria del store global.
 
+## Build Release (APK) — card 15
+
+Build de producción en modo Release. La app usa el flujo **CNG** de Expo: el proyecto
+nativo `android/` se genera con `prebuild` (está en `.gitignore`) y se compila con Gradle.
+
+```bash
+npx expo prebuild --platform android        # genera android/ (una vez)
+cd android && ./gradlew assembleRelease      # APK Release
+# Artefacto: android/app/build/outputs/apk/release/app-release.apk
+```
+
+Alternativa en la nube (no requiere SDK local): `eas build -p android --profile preview`
+(APK) o `--profile production` (AAB); perfiles definidos en `eas.json`.
+
+**Importante:** el build nativo C++ (CMake/ninja) de React Native **falla si la ruta del
+proyecto contiene espacios** (`ninja: ... build.ninja still dirty after 100 tries`). Si la
+ruta los tiene, compila desde una copia en una ruta sin espacios. Además,
+`android/local.properties` debe usar barras normales (`sdk.dir=C:/.../Android/Sdk`).
+
+Métricas del build (tamaño/tiempo) registradas en `docs/react-native-build-metrics.md`:
+**63.28 MB**, **~13 min** (build limpio universal). Instalar en dispositivo:
+`adb install -r dist/productos-rn-release.apk`.
+
 ## Ejecutar
 
 ```bash
