@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Requerido para consumir la API REST (DummyJSON) en builds release.
+         El manifest de debug ya la incluye; en release debe declararse aquí o
+         la app no tendría acceso a red ("sin conexión"). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="productos_app"
         android:name="${applicationName}"

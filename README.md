@@ -93,10 +93,31 @@ Flutter 664 ms / RN 414 ms) se descarta. El pintado final en pantalla se evalúa
 
 ## 3. Fluidez de la interfaz (FPS / jank)
 
-| Métrica              | Flutter | React Native | Observaciones |
-|----------------------|---------|--------------|---------------|
-| FPS promedio (scroll)| _—_     | _—_          |               |
-| Frames con jank      | _—_     | _—_          |               |
+Fluidez del **scroll de la lista** y de las **transiciones de navegación**, medida en el
+**mismo teléfono físico** y en build **Release** para ambos stacks. La pantalla corre a **120 Hz**
+(presupuesto de frame 8.33 ms; 16.67 ms a 60 Hz). No existe una herramienta única que lea los
+dos motores (Flutter no usa HWUI), así que cada app se mide con su propio profiler: Flutter con
+`addTimingsCallback`/`FrameTiming` (el dato del *Frames chart* de DevTools) y RN con
+`dumpsys gfxinfo` (FrameMetrics, el dato del *Perf Monitor*). La comparación se ancla en las
+métricas **relativas al presupuesto** (% de frames perdidos y % de jank). Detalle, gestos y
+evidencia (datos crudos + capturas): [`docs/comparativa-fluidez-fps.md`](docs/comparativa-fluidez-fps.md).
+
+| Interacción / métrica            | Flutter        | React Native   | Observaciones |
+|----------------------------------|----------------|----------------|---------------|
+| **Scroll** — tiempo medio/frame  | 2.51 ms        | 6.39 ms        | Flutter menor coste por frame; ambos muy holgados |
+| **Scroll** — frames > 60 Hz (16.67 ms) | **0 %**  | **0 %**        | Ninguna pierde frames al hacer scroll |
+| **Scroll** — jank (sistema)      | sin jank       | 0.19 % (2/1037)| Scroll esencialmente perfecto en ambos |
+| **Navegación** — tiempo medio/frame | 4.77 ms     | 9.02 ms        | Transición más cara en ambos; RN medio sobre 8.33 ms |
+| **Navegación** — frames > 60 Hz  | 0.6 % (5/890)  | 0.8 % (8/956)  | >99 % de frames dentro del presupuesto de 60 Hz |
+| **Navegación** — jank (sistema)  | ~0.3 %         | 2.30 % (22/956)| Jank **leve y no sostenido**; Flutter tuvo 1 pico de 53 ms (1er build de Detalle) |
+
+**Lectura:** en este dispositivo **ambas apps son fluidas a 60 fps o más**. En *scroll* las dos
+son prácticamente perfectas (0 frames perdidos a 60 Hz). En *navegación* mantienen >99 % de los
+frames dentro del presupuesto de 60 Hz; RN muestra algo más de jank durante la animación (2.30 %)
+y Flutter un pico puntual al construir la pantalla por primera vez. Flutter tiene **menor tiempo
+de producción de frame** (Skia + AOT); RN (Hermes + Fabric) se mantiene dentro del presupuesto
+con un coste extra marginal. Para esta lista CRUD de 30 ítems, **la diferencia de fluidez es
+pequeña y no perceptible para el usuario**.
 
 ## 4. Tiempo de compilación
 
