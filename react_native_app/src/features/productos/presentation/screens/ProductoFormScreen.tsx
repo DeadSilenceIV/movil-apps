@@ -121,6 +121,14 @@ export default function ProductoFormScreen({ navigation, route }: Props) {
       >
         {existing ? 'Guardar cambios' : 'Crear producto'}
       </Button>
+      <Button
+        mode="outlined"
+        onPress={() => navigation.goBack()}
+        disabled={saving}
+        style={styles.cancel}
+      >
+        Cancelar
+      </Button>
     </ScrollView>
   );
 }
@@ -134,5 +142,8 @@ const styles = StyleSheet.create({
   },
   save: {
     marginTop: spacing.xl,
+  },
+  cancel: {
+    marginTop: spacing.sm,
   },
 });

@@ -11,12 +11,15 @@ interface ProductosState {
   items: Producto[];
   error: string;
   query: string;
+  /** Mensaje de feedback (Snackbar) tras una operación CRUD; '' = oculto. */
+  notice: string;
 
   load: (refresh?: boolean) => Promise<void>;
   search: (value: string) => void;
   create: (producto: Producto) => Promise<boolean>;
   edit: (producto: Producto) => Promise<boolean>;
   remove: (id: number) => Promise<boolean>;
+  dismissNotice: () => void;
 }
 
 const messageOf = (e: unknown): string =>
@@ -33,6 +36,7 @@ export const useProductosStore = create<ProductosState>((set, get) => ({
   items: [],
   error: '',
   query: '',
+  notice: '',
 
   load: async (refresh = false) => {
     set({ status: 'loading', error: '' });
@@ -50,10 +54,10 @@ export const useProductosStore = create<ProductosState>((set, get) => ({
     try {
       await productosUseCases.createProducto.call(producto);
       const items = await productosUseCases.getProductos.call(false);
-      set({ items, status: 'loaded' });
+      set({ items, status: 'loaded', notice: 'Producto creado' });
       return true;
     } catch (e) {
-      set({ error: messageOf(e) });
+      set({ error: messageOf(e), notice: 'No se pudo crear el producto' });
       return false;
     }
   },
@@ -62,10 +66,10 @@ export const useProductosStore = create<ProductosState>((set, get) => ({
     try {
       await productosUseCases.updateProducto.call(producto);
       const items = await productosUseCases.getProductos.call(false);
-      set({ items });
+      set({ items, notice: 'Producto actualizado' });
       return true;
     } catch (e) {
-      set({ error: messageOf(e) });
+      set({ error: messageOf(e), notice: 'No se pudo actualizar el producto' });
       return false;
     }
   },
@@ -74,20 +78,27 @@ export const useProductosStore = create<ProductosState>((set, get) => ({
     try {
       await productosUseCases.deleteProducto.call(id);
       const items = await productosUseCases.getProductos.call(false);
-      set({ items });
+      set({ items, notice: 'Producto eliminado' });
       return true;
     } catch (e) {
-      set({ error: messageOf(e) });
+      set({ error: messageOf(e), notice: 'No se pudo eliminar el producto' });
       return false;
     }
   },
+
+  dismissNotice: () => set({ notice: '' }),
 }));
 
-/** Selector: lista visible aplicando el filtro de búsqueda sobre el estado en memoria. */
-export const selectVisibleProductos = (state: ProductosState): Producto[] => {
-  const q = state.query.trim().toLowerCase();
-  if (q === '') return state.items;
-  return state.items.filter(
+/**
+ * Filtra la lista en memoria por el texto de búsqueda. Es una función pura (no un
+ * selector de zustand) para que la pantalla la memoice con `useMemo`: devolver un
+ * array nuevo desde un selector de zustand v5 provoca un bucle infinito de render
+ * ("getSnapshot should be cached"), ya que la referencia cambia en cada llamada.
+ */
+export const filterProductos = (items: Producto[], query: string): Producto[] => {
+  const q = query.trim().toLowerCase();
+  if (q === '') return items;
+  return items.filter(
     (p) => p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q),
   );
 };

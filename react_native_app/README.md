@@ -40,9 +40,10 @@ src/
     presentation/
       state/        # productosStore.ts (Zustand) — estado global en RAM
       screens/      # ProductosList / ProductoDetail / ProductoForm
+      widgets/      # ProductoCard, GlobalSnackbar (feedback CRUD)
   navigation/       # AppNavigator.tsx — native-stack tipado (3 rutas)
   di/               # container.ts — composición de dependencias (use cases)
-App.tsx             # raíz: ThemeProvider + AppNavigator
+App.tsx             # raíz: ThemeProvider + AppNavigator + GlobalSnackbar
 scripts/
   validate-api.ts   # validación de la capa de API contra DummyJSON
   validate-state.ts # validación del estado en memoria (CRUD en RAM)
@@ -122,6 +123,28 @@ retorno y header estilizado según el design system (mismos hex que la app Flutt
 Las rutas y sus parámetros están tipados en `RootStackParamList`, por lo que `navigate`
 verifica en compilación que cada pantalla reciba los parámetros correctos. El back gesture
 nativo no rompe el estado: la lista permanece en RAM en el store global.
+
+## Listas dinámicas + CRUD en memoria (card 14)
+
+UI de productos completa sobre el estado en RAM (sin recargar del API), con el mismo
+diseño que la app Flutter (`docs/design-system.md` §4):
+
+- **Tarjetas** (`widgets/ProductoCard.tsx`): `Card` radio 16 con sombra suave, thumbnail
+  56×56 (radio 12, con placeholder si falla la imagen), título, categoría e icono de
+  eliminar; precio destacado en `primary`.
+- **Lista** (`ProductosListScreen`): `FlatList` de tarjetas con scroll fluido,
+  **búsqueda** (`Searchbar` → filtra en memoria), **pull-to-refresh** y estados visuales de
+  **carga** (spinner), **vacío** (ícono + mensaje, distinto si hay búsqueda) y **error**
+  (ícono + mensaje + reintentar).
+- **Feedback CRUD**: cada operación deja un mensaje en el store que muestra un
+  **Snackbar global** (`widgets/GlobalSnackbar.tsx`) montado en `App.tsx`; así el aviso
+  sobrevive a la navegación de regreso (equivalente al `ScaffoldMessenger` de Flutter).
+- **Confirmación de borrado**: `Alert` nativo antes de eliminar (en la lista y el detalle).
+- **Formulario**: inputs `outlined` (radio 12) con validación visible (título obligatorio,
+  precio > 0) y botones primario *Guardar* / secundario *Cancelar*.
+
+Todas las operaciones (crear/editar/eliminar/buscar) se reflejan de inmediato en la lista
+porque operan sobre el estado en memoria del store global.
 
 ## Ejecutar
 

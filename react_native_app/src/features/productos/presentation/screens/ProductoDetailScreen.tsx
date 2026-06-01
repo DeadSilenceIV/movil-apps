@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useLayoutEffect } from 'react';
-import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Chip, Divider, IconButton, Text } from 'react-native-paper';
 
 import { radius, spacing, typography, useAppTheme } from '../../../../core/theme';
@@ -44,9 +44,22 @@ export default function ProductoDetailScreen({ navigation, route }: Props) {
     );
   }
 
-  const onDelete = async () => {
-    const ok = await remove(producto.id);
-    if (ok) navigation.goBack();
+  const onDelete = () => {
+    Alert.alert(
+      'Eliminar producto',
+      `¿Eliminar "${producto.title}"? Esta acción no se puede deshacer.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            const ok = await remove(producto.id);
+            if (ok) navigation.goBack();
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -72,19 +85,15 @@ export default function ProductoDetailScreen({ navigation, route }: Props) {
       </View>
 
       <View style={styles.chips}>
-        {producto.category !== '' && <Chip icon="tag">{producto.category}</Chip>}
+        <Chip icon="tag">{producto.category === '' ? 'Sin categoría' : producto.category}</Chip>
         <Chip icon="package-variant">Stock: {producto.stock}</Chip>
-        <Chip icon="star">{producto.rating.toFixed(1)}</Chip>
+        {producto.rating > 0 && <Chip icon="star">{producto.rating.toFixed(1)}</Chip>}
       </View>
 
-      {producto.description !== '' && (
-        <>
-          <Divider />
-          <Text style={[typography.body, { color: theme.colors.onSurfaceMuted }]}>
-            {producto.description}
-          </Text>
-        </>
-      )}
+      <Divider />
+      <Text style={[typography.body, { color: theme.colors.onSurfaceMuted }]}>
+        {producto.description === '' ? 'Sin descripción.' : producto.description}
+      </Text>
 
       <Button
         mode="outlined"
