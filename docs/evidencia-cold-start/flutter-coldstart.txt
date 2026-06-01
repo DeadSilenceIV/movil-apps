@@ -1,0 +1,24 @@
+Métrica: Cold Start (tiempo de arranque en frío) — Flutter Release
+Dispositivo: 2506BPN68G (klimt), Android 15 (API 35), arm64
+Paquete: com.movilapps.productos_app/.MainActivity
+Build: Release (flags=0x0, no debuggable; Dart AOT)
+Método: adb shell am force-stop  ->  am start -W  ->  TotalTime (ms)
+Protocolo: 1 warm-up (descartado) + 10 medidas. LaunchState=COLD en todas.
+Fecha: 2026-06-01
+
+warmup  TotalTime=277 ms  LaunchState=COLD   (descartado)
+m1      TotalTime=232 ms  LaunchState=COLD
+m2      TotalTime=229 ms  LaunchState=COLD
+m3      TotalTime=243 ms  LaunchState=COLD
+m4      TotalTime=210 ms  LaunchState=COLD
+m5      TotalTime=213 ms  LaunchState=COLD
+m6      TotalTime=226 ms  LaunchState=COLD
+m7      TotalTime=211 ms  LaunchState=COLD
+m8      TotalTime=222 ms  LaunchState=COLD
+m9      TotalTime=194 ms  LaunchState=COLD
+m10     TotalTime=220 ms  LaunchState=COLD
+
+n=10  avg=220.0 ms  mediana=221 ms  min=194 ms  max=243 ms  desv.est=13.0 ms
+
+Verificación cruzada (evento del sistema en logcat, otra ejecución en frío):
+ActivityTaskManager: Displayed com.movilapps.productos_app/.MainActivity for user 0: +207ms

@@ -1,0 +1,24 @@
+Métrica: Cold Start (tiempo de arranque en frío) — React Native Release
+Dispositivo: 2506BPN68G (klimt), Android 15 (API 35), arm64
+Paquete: com.movilapps.productos_rn/.MainActivity
+Build: Release (flags=0x0, no debuggable; Hermes + Fabric)
+Método: adb shell am force-stop  ->  am start -W  ->  TotalTime (ms)
+Protocolo: 1 warm-up (descartado) + 10 medidas. LaunchState=COLD en todas.
+Fecha: 2026-06-01
+
+warmup  TotalTime=188 ms  LaunchState=COLD   (descartado)
+m1      TotalTime=133 ms  LaunchState=COLD
+m2      TotalTime=144 ms  LaunchState=COLD
+m3      TotalTime=133 ms  LaunchState=COLD
+m4      TotalTime=141 ms  LaunchState=COLD
+m5      TotalTime=146 ms  LaunchState=COLD
+m6      TotalTime=148 ms  LaunchState=COLD
+m7      TotalTime=147 ms  LaunchState=COLD
+m8      TotalTime=137 ms  LaunchState=COLD
+m9      TotalTime=135 ms  LaunchState=COLD
+m10     TotalTime=154 ms  LaunchState=COLD
+
+n=10  avg=141.8 ms  mediana=142.5 ms  min=133 ms  max=154 ms  desv.est=6.8 ms
+
+Verificación cruzada (evento del sistema en logcat, otra ejecución en frío):
+ActivityTaskManager: Displayed com.movilapps.productos_rn/.MainActivity for user 0: +138ms
