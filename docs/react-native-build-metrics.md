@@ -53,11 +53,14 @@ cd android && ./gradlew assembleRelease
 
 ## Comparación rápida (mismo equipo, build Release universal)
 
-| App           | Tamaño APK            | Tiempo build limpio |
-|---------------|-----------------------|---------------------|
-| Flutter       | 47.40 MB              | ~110 s              |
-| React Native  | 63.28 MB              | ~785 s (13 m 05 s)  |
+| App           | Tamaño APK            | Tiempo build limpio | Recarga dev (percibido) |
+|---------------|-----------------------|---------------------|-------------------------|
+| Flutter       | 47.40 MB              | ~110 s              | ~1.7 s (hot reload)     |
+| React Native  | 63.28 MB              | ~785 s (13 m 05 s)  | ~0.34 s (fast refresh)  |
 
-> Para las cards 16/19: repetir las mediciones en el mismo equipo, promediar varias corridas
-> y registrar el build incremental (segunda compilación sin cambios), que es mucho más rápido
-> que el build limpio aquí medido.
+> **Comparación consolidada de la card 16** (tamaño, compilación y recarga, con diferencias en
+> MB/% y evidencia): [`comparativa-tamano-compilacion.md`](comparativa-tamano-compilacion.md).
+>
+> Para la card 19 (cold start): repetir en el mismo equipo, promediar varias corridas y
+> registrar también el build incremental (segunda compilación sin cambios), más rápido que el
+> build limpio aquí medido.

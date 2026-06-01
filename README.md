@@ -53,17 +53,21 @@ npx expo start
 > para que la comparación sea justa.
 
 ## Metodología
-- **Equipo de medición:** _(CPU, RAM, SO)_ — _por definir_
-- **Dispositivo/emulador:** _(modelo, versión Android/iOS)_ — _por definir_
-- **Tipo de build:** Release
-- **Nº de repeticiones por métrica:** ≥ 10 (se reporta el promedio)
+- **Equipo de medición:** Windows 11 (build 26200) — mismo portátil para ambos stacks.
+- **Dispositivo/emulador:** emulador `Medium_Phone_API_36.1` (Android API 36, x86_64).
+- **Tipo de build:** Release (tamaño/compilación) · desarrollo/debug (recarga).
+- **Nº de repeticiones por métrica:** recarga 1 warm-up + 5 medidas (se reporta el promedio);
+  tamaño/compilación: build limpio.
+- **Evidencia detallada:** [`docs/comparativa-tamano-compilacion.md`](docs/comparativa-tamano-compilacion.md)
+  (card 16) y los datos crudos en [`docs/flutter-build-metrics.md`](docs/flutter-build-metrics.md) /
+  [`docs/react-native-build-metrics.md`](docs/react-native-build-metrics.md).
 
 ## 1. Tamaño del APK / AAB
 
-| Métrica            | Flutter | React Native | Observaciones |
-|--------------------|---------|--------------|---------------|
-| Tamaño APK release | _—_     | _—_          |               |
-| Tamaño AAB         | _—_     | _—_          |               |
+| Métrica            | Flutter   | React Native | Observaciones |
+|--------------------|-----------|--------------|---------------|
+| Tamaño APK release | 47.40 MB  | 63.28 MB     | APK universal/fat; RN **+15.88 MB (+33.5 %)** por Hermes + runtime RN + bundle JS |
+| Tamaño AAB         | _n/a_     | _n/a_        | No generado; ambos comparados como APK universal |
 
 ## 2. Tiempo de respuesta de la API
 
@@ -86,10 +90,20 @@ _(Promedio de ≥10 ejecuciones por operación.)_
 
 ## 4. Tiempo de compilación
 
-| Métrica                  | Flutter | React Native | Observaciones |
-|--------------------------|---------|--------------|---------------|
-| Build release (limpio)   | _—_     | _—_          |               |
-| Build incremental        | _—_     | _—_          |               |
+| Métrica                  | Flutter        | React Native      | Observaciones |
+|--------------------------|----------------|-------------------|---------------|
+| Build release (limpio)   | ~110 s (107.7) | ~785 s (13 m 05 s)| Gradle `assembleRelease`; RN **~7.1×** por recompilar C++ nativo (CMake/NDK) + Hermes |
+| Build incremental        | _—_            | _—_               | Pendiente (segundo build sin cambios) |
+
+### 4.1 Recarga en desarrollo (hot reload / fast refresh)
+
+Medido en el mismo emulador (1 warm-up + 5 medidas). Detalle en
+[`docs/comparativa-tamano-compilacion.md`](docs/comparativa-tamano-compilacion.md).
+
+| Métrica de recarga                   | Flutter (hot reload) | React Native (fast refresh) | Observaciones |
+|--------------------------------------|----------------------|-----------------------------|---------------|
+| Recompilación/HMR (lado herramienta) | ~880 ms              | **132 ms**                  | Flutter: compile+reload+reassemble (daemon); RN: `update-start→update-done` de Metro |
+| Percibido (guardar → listo)          | ~1717 ms (~1.2 s est.)| **~335 ms**                | RN **~5× más rápido**: Fast Refresh solo re-transforma el módulo editado |
 
 ## 5. Cold Start (arranque en frío)
 
