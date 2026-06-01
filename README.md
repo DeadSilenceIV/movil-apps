@@ -54,12 +54,15 @@ npx expo start
 
 ## Metodología
 - **Equipo de medición:** Windows 11 (build 26200) — mismo portátil para ambos stacks.
-- **Dispositivo/emulador:** emulador `Medium_Phone_API_36.1` (Android API 36, x86_64).
-- **Tipo de build:** Release (tamaño/compilación) · desarrollo/debug (recarga).
-- **Nº de repeticiones por métrica:** recarga 1 warm-up + 5 medidas (se reporta el promedio);
-  tamaño/compilación: build limpio.
+- **Dispositivo/emulador:** emulador `Medium_Phone_API_36.1` (Android API 36, x86_64) para
+  tamaño/compilación/recarga; teléfono físico `2506BPN68G` (Android 15, API 35) para el tiempo
+  de respuesta de la API (§2), donde la **misma red** importa — ambos stacks en el mismo equipo.
+- **Tipo de build:** Release (tamaño/compilación) · desarrollo/debug (recarga y respuesta API).
+- **Nº de repeticiones por métrica:** recarga 1 warm-up + 5 medidas; respuesta API 2 warm-up +
+  10 medidas (se reporta el promedio); tamaño/compilación: build limpio.
 - **Evidencia detallada:** [`docs/comparativa-tamano-compilacion.md`](docs/comparativa-tamano-compilacion.md)
-  (card 16) y los datos crudos en [`docs/flutter-build-metrics.md`](docs/flutter-build-metrics.md) /
+  (card 16), [`docs/comparativa-tiempo-respuesta-api.md`](docs/comparativa-tiempo-respuesta-api.md)
+  (card 17) y los datos crudos en [`docs/flutter-build-metrics.md`](docs/flutter-build-metrics.md) /
   [`docs/react-native-build-metrics.md`](docs/react-native-build-metrics.md).
 
 ## 1. Tamaño del APK / AAB
@@ -71,15 +74,22 @@ npx expo start
 
 ## 2. Tiempo de respuesta de la API
 
-| Operación        | Flutter | React Native | Observaciones |
-|------------------|---------|--------------|---------------|
-| GET lista        | _—_     | _—_          |               |
-| GET detalle      | _—_     | _—_          |               |
-| POST crear       | _—_     | _—_          |               |
-| PUT actualizar   | _—_     | _—_          |               |
-| DELETE eliminar  | _—_     | _—_          |               |
+Tiempo desde el **inicio de la solicitud** hasta tener los **datos listos para renderizar**
+(`GET /products?limit=30` → JSON → `List<Producto>`), la carga de la pantalla principal. Medido
+en el **mismo teléfono físico y la misma red** para ambos stacks: 2 warm‑up + 10 medidas.
+Detalle y evidencia: [`docs/comparativa-tiempo-respuesta-api.md`](docs/comparativa-tiempo-respuesta-api.md).
 
-_(Promedio de ≥10 ejecuciones por operación.)_
+| Estadístico (n=10)  | Flutter         | React Native    | Observaciones |
+|---------------------|-----------------|-----------------|---------------|
+| **Promedio (avg)**  | **118.3 ms**    | **118.9 ms**    | Prácticamente iguales: RN **+0.6 ms (+0.5 %)**, dentro del ruido de red |
+| Mediana             | ~97.2 ms        | ~112.5 ms       | Flutter algo más rápido por mediana/mínimo |
+| Mínimo / Máximo     | 84.0 / 199.6 ms | 97.6 / 154.6 ms | Flutter mejor mínimo; RN mejor máximo |
+| Desviación estándar | 38.5 ms         | 18.1 ms         | RN más consistente (menos varianza) |
+
+**Lectura:** el tiempo de respuesta de la API está **dominado por la red**, no por la
+plataforma. Ante el mismo endpoint y la misma red, Flutter y React Native rinden **igual en
+promedio** (~118 ms); no hay diferencia significativa. El primer request (warm‑up, DNS+TLS:
+Flutter 664 ms / RN 414 ms) se descarta. El pintado final en pantalla se evalúa en §3 (FPS).
 
 ## 3. Fluidez de la interfaz (FPS / jank)
 
